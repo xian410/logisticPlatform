@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="">
+<head>
+    <meta charset="UTF-8">
+    <title>账户管理</title>
+    <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="../assets/nprogress/nprogress.css">
+    <link rel="stylesheet" href="../css/element-ui@2.13.0-theme-chalk-index.css">
+    <link rel="stylesheet" href="../css/index.css">
+</head>
+<body>
+<div id="app">
+    <!-- 客户列表 -->
+    <div class="body">
+        <!-- 面包屑 -->
+        <ol class="breadcrumb">
+            <li><a href="javascript:;">账户管理</a></li>
+            <li class="active">账户列表</li>
+        </ol>
+        <div class="panel panel-default user-list">
+            <div class="panel-body">
+                <form action="" class="form-inline">
+                    <div class="input-group pull-right" style="margin-right: 50px">
+                        <label>姓名：</label>
+                        <el-input style="width: 100px" v-model="search.name"></el-input>
+                        <span class="input-group-btn">
+                            <el-button  @click="getList()" value="搜索"  style="margin-left: 10px">查询</el-button>
+                        </span>
+                    </div>
+               </form>
+            </div>
+            <template>
+                <el-table
+                        :data="users"
+                        style="width: 100%"
+                        border
+                        :default-sort = "{prop: 'date', order: 'descending'}"
+                >
+                    <el-table-column
+                            prop="loginId"
+                            label="账号"
+                            sortable
+                            width="220">
+                    </el-table-column>
+                    <el-table-column
+                            prop="name"
+                            label="姓名"
+                            sortable
+                            width="220">
+                    </el-table-column>
+                    <el-table-column
+                            prop="type"
+                            label="用户类型"
+                            sortable
+                            width="220">
+                    </el-table-column>
+                    <el-table-column
+                            prop="money"
+                            label="账户余额"
+                            sortable
+                            width="220">
+                    </el-table-column>
+                    <el-table-column
+                            prop="time"
+                            label="上次登录时间"
+                            sortable
+                            width="220">
+                    </el-table-column>
+                    <el-table-column
+                            prop="operate"
+                            label="操作">
+                        <template slot-scope="scope">
+<!--                            <el-button-->
+<!--                                    size="mini"-->
+<!--                                    @click="handleModify(scope.$index, scope.row)">修改账户余额</el-button>-->
+                            <el-button
+                                    size="mini"
+                                    type="danger"
+                                    @click="delUser(scope.$index, scope.row)">删除账号</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </template>
+        </div>
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                background
+                :current-page="page.current"
+                :page-sizes="[5, 10, 20, 40]"
+                :page-size="page.size"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="page.total"
+                style="margin-bottom: 30px">
+        </el-pagination>
+
+        <!--修改账户余额对话框-->
+        <el-dialog title="修改账户余额" :visible.sync="modAccountVisible">
+            <el-form :model="modForm">
+                <el-form-item label="原始金额" :label-width="formLabelWidth">
+                    <label>￥{{modForm.preMoney}}</label>
+                </el-form-item>
+                <el-form-item label="改后金额" :label-width="formLabelWidth">
+                    <el-input v-model="modForm.modMoney" autocomplete="off" placeholder="￥"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="addFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="modAccount()">确 定</el-button>
+            </div>
+        </el-dialog>
+    </div>
+</div>
+<script src="../assets/jquery/jquery.min.js"></script>
+<script src="../js/vue-v2.6.11.js"></script>
+<script src="../js/element-ui@2.13.0-index.js"></script>
+<script src="../assets/bootstrap/js/bootstrap.min.js"></script>
+<script src="../assets/nprogress/nprogress.js"></script>
+<script src="../js/common.js"></script>
+<script src="../js/apiurls.js"></script>
+<script>
+    let vm = new Vue({
+        el: '#app',
+        data() {
+            return {
+                search: {
+                    name:'',
+                },
+                modAccountVisible: false,
+                formLabelWidth: '80px',
+                users:[],
+                page: {
+                    //当前页
+                    current: 1,
+                    //最大页数
+                    total: '',
+                    size: 10
+                },
+                modForm: {
+                    loginId:'',
+                    preMoney:'',
+                    modMoney:''
+                }
+            }
+        },
+        methods:{
+            getList() {
+                let that = this
+                let data = {
+                    name: that.search.name,
+                    pageRequest: {
+                        "current": that.page.current,
+                        "size": that.page.size
+                    },
+                }
+
+                getPostData(apiUrls.account.getAllAccount,data,'post',function (data) {
+                    if (data.msg === 'success') {
+                        that.users = data.data.records
+                        that.page.total = data.data.total
+                    } else {
+                        that.$message({
+                            message: data.msg,
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            handleModify(index,row) {
+                console.log(row)
+                this.modForm.loginId = row.loginId
+                this.modForm.preMoney = row.money
+                this.modAccountVisible = true
+            },
+
+            delUser(index,row) {
+                let that = this
+                that.$confirm('您确定要删除此用户吗?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let data = {
+                        loginId: row.loginId
+                    }
+                    getPostData(apiUrls.login_user.delUser,data,'post',function (data) {
+                        if (data.msg === 'success') {
+                            that.$message({
+                                message: data.msg,
+                                type: 'success'
+                            });
+                            that.getList()
+                        } else {
+                            that.$message({
+                                message: data.msg,
+                                type: 'error'
+                            });
+                        }
+                    })
+                })
+            },
+            modAccount() {
+                let that = this
+                let data = {
+                    loginId:that.modForm.loginId,
+                    money: that.modForm.modMoney
+                }
+                getPostData(apiUrls.account.modMoneyById,data,'post',function (data) {
+                    if (data.msg === 'success') {
+                        that.$message({
+                            message: "修改成功",
+                            type: 'success'
+                        });
+                        that.modAccountVisible = false
+                        that.getList()
+                    } else {
+                        that.$message({
+                            message: data.msg,
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            handleSizeChange: function (size) {
+                this.page.size = size;
+                console.log(this.page.size)  //每页下拉显示数据
+                this.getGoods()
+            },
+            handleCurrentChange: function (currentPage) {
+                this.page.current = currentPage;
+                console.log(this.page.current)  //点击第几页
+                this.getGoods()
+            },
+
+
+        },
+        mounted(){
+            this.getList(1)
+        }
+    })
+</script>
+</body>
+</html>

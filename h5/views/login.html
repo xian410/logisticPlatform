@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html lang="en" >
+<head>
+<meta charset="UTF-8">
+<title>物流运输平台</title>
+  <link rel="stylesheet" href="../css/reset.min.css">
+  <link rel="stylesheet" href="../css/login.css">
+  <link rel="stylesheet" href="../css/element-ui@2.13.0-theme-chalk-index.css">
+</head>
+<body>
+<div id="app">
+  <h1 style="text-align: center;color: white;font-size: 50px;padding-top: 100px" >物流运输平台</h1>
+  <section class="user">
+    <div class="user_options-container">
+      <div class="user_options-text">
+        <div class="user_options-unregistered">
+          <h2 class="user_unregistered-title">没有账号？</h2>
+          <p class="user_unregistered-text">点击按钮注册成为会员.</p>
+          <button class="user_unregistered-signup" id="signup-button" @click="turnLeft()">注册</button>
+        </div>
+
+        <div class="user_options-registered">
+          <h2 class="user_registered-title">已有账号?</h2>
+          <p class="user_registered-text">点击按钮会员登录.</p>
+          <button class="user_registered-login" id="login-button" @click="turnRight()">登录</button>
+        </div>
+      </div>
+
+      <div class="user_options-forms" id="user_options-forms">
+        <div class="user_forms-login">
+          <h2 class="forms_title">登录</h2>
+          <form class="forms_form">
+            <fieldset class="forms_fieldset">
+              <div class="forms_field">
+                <input v-model="loginForm.telephone" placeholder="手机号" class="forms_field-input" />
+              </div>
+              <div class="forms_field">
+                <input v-model="loginForm.password" type="password" placeholder="密码" class="forms_field-input"/>
+              </div>
+            </fieldset>
+            <div class="forms_buttons" style="margin-top: 60px">
+              <button @click="getHelp()" type="button" class="forms_buttons-forgot">忘记密码?</button>
+              <el-button type="primary" @click="login()" style="background-color: #E8716D;border: 1px solid #E8716D">登录</el-button>
+            </div>
+          </form>
+        </div>
+        <div class="user_forms-signup">
+          <h2 class="forms_title">注册</h2>
+          <form class="forms_form">
+            <fieldset class="forms_fieldset">
+              <div class="forms_field">
+                <lable>司机：</lable>
+                 <input v-model="registerForm.type" type="radio" name="optionsRadios"  value="1" >
+                <lable>货主：</lable>
+                 <input v-model="registerForm.type" type="radio" name="optionsRadios"  value="0" >
+              </div>
+              <div class="forms_field">
+                <input v-model="registerForm.name" type="text" placeholder="姓名" class="forms_field-input"/>
+              </div>
+              <div class="forms_field">
+                <input v-model="registerForm.telephone" placeholder="手机号" class="forms_field-input"/>
+              </div>
+              <div class="forms_field">
+                <input v-model="registerForm.password" type="password" placeholder="密码" class="forms_field-input"/>
+              </div>
+              <div class="forms_field">
+                <input v-model="registerForm.confirm" type="password" placeholder="确认密码" class="forms_field-input"/>
+              </div>
+            </fieldset>
+            <div class="forms_buttons" >
+              <el-button type="primary" @click="register()" style="background-color: #E8716D;border: 1px solid #E8716D">注册</el-button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="../js/jquery-3.5.1.min.js"></script>
+<script src="../js/vue-v2.6.11.js"></script>
+<script src="../js/element-ui@2.13.0-index.js"></script>
+<script src="../js/common.js"></script>
+<script src="../js/apiurls.js"></script>
+<script>
+  let apps = new Vue({
+    el: '#app',
+    data: {
+      loginForm: {
+        telephone: '',
+        password: '',
+      },
+      registerForm: {
+        type: 0,
+        name:'',
+        telephone: '',
+        password: '',
+        confirm:''
+      },
+    },
+    methods: {
+      getHelp() {
+        this.$message({
+          message: '请联系234818290获取帮助',
+          type: 'info'
+        });
+      },
+      //登录验证
+      login(obj) {
+        let that = this;//fetch中this指针改变，用that保留vue对象
+        //判空
+        if (!this.loginForm.telephone || !this.loginForm.password) {
+          this.$message({
+            message: '请输入手机号或密码',
+            type: 'warning'
+          });
+          return;
+        }else {
+          let data = {
+            loginId: that.loginForm.telephone,
+            password: that.loginForm.password
+          }
+          getPostData(apiUrls.login_user.login,data,'post',function (data) {
+            if(data.msg === 'success') {
+              that.$message({
+                message: "登录成功",
+                type: "success"
+              })
+              localStorage.setItem('token',data.data.token);
+              if (data.data.userType === 0) {
+                setTimeout(function (){
+                  window.location.href = "homePage-customer.html"
+                },800)
+              } else {
+                setTimeout(function (){
+                  window.location.href = "homePage.html"
+                },300)
+              }
+            } else {
+              that.$message({
+                message: data.msg,
+                type: "error"
+              })
+            }
+          })
+        }
+      },
+      register() {
+        let that = this;//fetch中this指针改变，用that保留vue对象
+        //条件限制
+        if (!this.registerForm.name || !this.registerForm.telephone || !this.registerForm.password || !this.registerForm.confirm) {
+          this.$message({
+            message: '请输入完整信息',
+            type: 'warning'
+          });
+          return;
+        }else if(this.registerForm.telephone.length != 11){
+          this.$message({
+            message: '请输入正确的手机号',
+            type: 'warning'
+          });
+        }else if(this.registerForm.password.length < 6){
+          this.$message({
+            message: '密码至少为六位',
+            type: 'warning'
+          });
+        }else if(this.registerForm.password != this.registerForm.confirm){
+          this.$message({
+            message: '两次密码输入不一致',
+            type: 'warning'
+          });
+        }else {
+          let data = {
+            type: that.registerForm.type,
+            name: that.registerForm.name,
+            loginId: that.registerForm.telephone,
+            password: that.registerForm.password,
+            password1: that.registerForm.confirm
+          }
+          getPostData(apiUrls.login_user.register,data,'post',function (data) {
+            if(data.msg === 'success') {
+              that.$message({
+                message: "注册成功",
+                type: "success"
+              })
+              setTimeout(function (){
+                window.location.reload()
+              },300)
+            } else {
+              that.$message({
+                message: data.msg,
+                type: "error"
+              })
+            }
+          })
+        }
+      },
+      turnLeft() {
+        const userForms = document.getElementById('user_options-forms')
+        userForms.classList.remove('bounceRight')
+        userForms.classList.add('bounceLeft')
+      },
+      turnRight() {
+        const userForms = document.getElementById('user_options-forms')
+        userForms.classList.remove('bounceLeft')
+        userForms.classList.add('bounceRight')
+      }
+    },
+  })
+</script>
+</body>
+</html>

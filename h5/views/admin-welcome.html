@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="UTF-8">
+    <title>课程信息管理系统</title>
+    <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/element-ui@2.13.0-theme-chalk-index.css">
+    <link rel="stylesheet" href="../assets/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="../assets/nprogress/nprogress.css">
+    <link rel="stylesheet" href="../css/index.css">
+</head>
+<body>
+<div id="app">
+    <div class="aside">
+        <!-- 个人资料 -->
+        <div class="profile">
+            <!-- 头像 -->
+            <div class="avatar img-circle">
+                <img src="../img/admin.png">
+            </div>
+            <h4>管理员{{code}}</h4>
+        </div>
+        <div class="navs">
+            <ul class="list-unstyled">
+                <li v-for="(items,index) in linkData" :key="index" :index="items.path" :id="'navbar-links-'+index">
+                    <a class="nav-link" href="javascript:void(0)" @click="handleSelect(items.path,index)" v-html="items.name"></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- 主体 -->
+    <div class="main">
+        <div class="container-fluid">
+            <!-- 头部 -->
+            <div class="header">
+                <nav class="navbar navbar-custom">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="javascript:;" @click="logout()">
+                                <i class="fa fa-sign-out"></i>
+                                退出
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:;">
+                                <i class="fa fa-tasks"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <iframe :src="urlPath" id="thisPage" width=100%" height="800px" style="border: 0;" ></iframe>
+    </div>
+</div>
+</div>
+<script src="../assets/jquery/jquery.min.js"></script>
+<script src="../js/vue-v2.6.11.js"></script>
+<script src="../js/element-ui@2.13.0-index.js"></script>
+<script src="../assets/bootstrap/js/bootstrap.min.js"></script>
+<script src="../assets/nprogress/nprogress.js"></script>
+<script src="../js/common.js"></script>
+<script src="../js/apiurls.js"></script>
+<script>
+    let vm = new Vue({
+        el: '#app',
+        data: {
+            urlPath:"accountManagement.html",
+            code:"04512",
+            activeIndex:0,
+            linkData:[{
+                name:'<i class="fa fa-user"></i>账户管理',
+                path:'accountManagement.html'
+            },{
+                name:'<i class="fa fa-home"></i>货物管理',
+                path:'goodManagement.html'
+            },{
+                name:'<i class="fa fa-home"></i>订单管理',
+                path:'orderManagement.html'
+            },{
+                name:'<i class="fa fa-tasks"></i>交易记录管理',
+                path:'tradingRecordManagement.html'
+            },{
+                name:'<i class="fa fa-th-large"></i>系统设置',
+                path:'../404.html'
+            },]
+        },
+        watch: {
+            activeIndex:{
+                deep:true,
+                handler(val,oval){
+                    document.getElementById('navbar-links-'+oval).classList.remove('active')
+                    document.getElementById('navbar-links-'+val).className += 'active';
+                }
+            }
+        },
+        methods:{
+            preSetActive() {
+                document.getElementById('navbar-links-0').className += 'active';
+                let url = window.location.href.toString();
+                let index = url.split('=')[1].split('&')[0]
+                let key = url.split('=')[2]
+                if (key === undefined) {
+                    key = "message.html"
+                }
+                if (isNaN(index)) {
+                    index = 0
+                }
+                this.activeIndex = index
+                this.urlPath = key;
+            },
+            handleSelect(key,index) {
+                window.location.href = 'admin-welcome.html?p='+index+'&key='+key
+            },
+            logout() {
+                let that = this
+                that.$confirm('您确定要退出吗?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    getPostData(apiUrls.login_user.logout,'','post',function (data) {
+                        if(data.code === 0) {
+                            window.location.href = 'adminLogin.html';
+                        }else {
+                            that.$message(data.msg);
+                        }
+                    })
+                });
+            }
+        },
+        mounted(){
+            this.preSetActive()
+        }
+    })
+
+
+</script>
+
+</body>
+</html>

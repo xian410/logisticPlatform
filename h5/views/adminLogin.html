@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>高校课程信息管理系统</title>
+    <link rel="stylesheet" href="../css/element-ui@2.13.0-theme-chalk-index.css">
+    <style>
+        [v-cloak]{
+            display: none;
+        }
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+        #app {
+            background: url('../img/bac_img.png') no-repeat;
+            background-size: 100% 100%;
+            height: 100%;
+            /*opacity: 0.9;*/
+        }
+        #sys-title {
+            color: white;
+            padding: 40px;
+            margin-top: 100px;
+            margin-left: 50px;
+            font-size: 44px;
+            text-align: right;
+        }
+
+        #login-form {
+            width: 360px;
+            margin: 200px auto;
+            border: 1px solid white;
+            border-radius: 5px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        #sys-version {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<div id="app" v-cloak>
+    <el-row>
+        <el-col :span="12">
+            <h1 id="sys-title">物流平台管理系统 管理员端</h1>
+        </el-col>
+        <el-col :span="12">
+            <el-form ref="form" :model="form" label-width="70px" id="login-form">
+                <h2 style="text-align: center;color: #606266">管理员登录</h2>
+                <el-form-item label="账号:">
+                    <el-input v-model="form.loginId" placeholder="请输入账号" clearable></el-input>
+                </el-form-item>
+                <el-form-item label="密码:">
+                    <el-input v-model="form.psd" placeholder="请输入密码" @keypress.native.enter="login()" show-password clearable></el-input>
+                </el-form-item>
+                <el-form-item style="">
+                    <el-button type="primary" @click="login()" :loading=is_loading>{{login_text}}</el-button>
+                    <el-button style="padding:12px 10px!important;background: transparent;border: 1px solid #409EFF;color: #409EFF;" type=""
+                               @click="getHelp">无法登陆？获取帮助→
+                    </el-button>
+                </el-form-item>
+            </el-form>
+        </el-col>
+    </el-row>
+</div>
+
+<script src="../js/jquery-3.5.1.min.js"></script>
+<script src="../js/vue-v2.6.11.js"></script>
+<script src="../js/element-ui@2.13.0-index.js"></script>
+<script src="../js/common.js"></script>
+<script src="../js/apiurls.js"></script>
+<script>
+    let apps = new Vue({
+        el: '#app',
+        data: {
+            form: {
+                loginId: '',
+                psd: '',
+            },
+            is_loading: false,
+            login_text: "立即登录"
+        },
+        methods: {
+            getHelp() {
+                this.$message({
+                    message: '请加入QQ群234818290获取帮助',
+                    type: 'info'
+                });
+            },
+            //登录验证
+            login() {
+                let that = this;//fetch中this指针改变，用that保留vue对象
+                //判空
+                if (!this.form.loginId || !this.form.psd) {
+                    this.$message({
+                        message: '请输入用户名或密码',
+                        type: 'warning'
+                    });
+                    return;
+                }else {
+                    that.is_loading = true
+                    that.login_text = "请稍后"
+                    let data = {
+                        loginId: that.form.loginId,
+                        password: that.form.psd
+                    }
+                    getPostData(apiUrls.login_user.adminLogin,data,'post',function (data) {
+                        if(data.msg === 'success') {
+                            localStorage.setItem('token',data.data.token);
+                            setTimeout(function (){
+                                that.is_loading = false;
+                                that.login_text = '立即登陆';
+                                localStorage.setItem('token',data.data.token);
+                                window.location.href = "admin-welcome.html"
+                            },800)
+                        } else {
+                            that.is_loading = false;
+                            that.login_text = '立即登陆';
+                            that.$message({
+                                message: data.msg,
+                                type: "error"
+                            })
+                        }
+                    })
+                }
+            },
+            changeLogin() {
+                window.location.href = 'officeLogin.html'
+            }
+        },
+    })
+</script>
+</body>
+</html>

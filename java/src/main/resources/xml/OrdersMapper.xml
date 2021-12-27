@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.management.mapper.OrdersMapper">
+
+    <resultMap id="SelectOrdersResponse" type="com.example.demo.management.entity.response.SelectOrdersResponse">
+        <result column="order_id" property="orderId"/>
+        <result column="good_id" property="goodId"/>
+        <result column="gName" property="goodName"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="Cname" property="customerName"/>
+        <result column="type_id" property="typeId"/>
+        <result column="Tname" property="typeName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="driver_id" property="driverId"/>
+        <result column="dName" property="driverName"/>
+        <result column="car_id" property="carId"/>
+        <result column="carName" property="carName"/>
+        <result column="car_number" property="carNumber"/>
+        <result column="dRemark" property="driverRemark"/>
+        <result column="dCreate_time" property="driverCreateTime"/>
+        <result column="cRemark" property="customerRemark"/>
+    </resultMap>
+
+
+    <select id="selectDriverOrders"
+            resultMap="SelectOrdersResponse" >
+        select o.order_id, o.good_id, g.name gName, g.type_id, t.name Tname, o.customer_id, c.name Cname,
+        g.start, g.destination, g.weight, o.status, o.driver_id, d.name dName,o.fees,
+        g.remark cRemark, o.create_time,d.car_id,ct.name carName,d.car_number,
+        d.telephone, d.gender, i.create_time dCreate_time,i.remark dRemark
+        from orders o, goods g, customer c, goods_type t, driver d, car_type ct,driver_intention i
+        <where>
+        o.good_id = g.good_id
+        and o.intention_id = i.intention_id
+        and g.type_id = t.type_id
+        and o.customer_id = c.customer_id
+        and o.driver_id = d.driver_id
+        and d.car_id = ct.car_id
+        and o.driver_id = #{driverId}
+        <if test="selectOrdersRequest.status == 1">
+
+        </if>
+        <if test="selectOrdersRequest.status == 2">
+            and o.status = 0
+        </if>
+        <if test="selectOrdersRequest.status == 3">
+            and o.status = 1
+        </if>
+        <if test="selectOrdersRequest.status == 4">
+            and o.status = 2
+        </if>
+        order by o.create_time desc
+    </where>
+    </select>
+
+
+    <select id="selectCustomerOrders"
+            resultMap="SelectOrdersResponse">
+        select o.order_id, o.good_id, g.name gName, g.type_id, t.name Tname, o.customer_id, c.name Cname,
+        g.start, g.destination, g.weight, o.status, o.driver_id, d.name dName,o.fees,
+        g.remark cRemark, o.create_time,d.car_id,ct.name carName,d.car_number,
+        d.telephone, d.gender, i.create_time dCreate_time,i.remark dRemark
+        from orders o, goods g, customer c, goods_type t, driver d, car_type ct,driver_intention i
+        <where>
+            o.good_id = g.good_id
+            and o.intention_id = i.intention_id
+            and g.type_id = t.type_id
+            and o.customer_id = c.customer_id
+            and o.driver_id = d.driver_id
+            and d.car_id = ct.car_id
+            and o.customer_id = #{customerId}
+            <if test="selectOrdersRequest.status == 1">
+
+            </if>
+            <if test="selectOrdersRequest.status == 2">
+                and o.status = 0
+            </if>
+            <if test="selectOrdersRequest.status == 3">
+                and o.status = 1
+            </if>
+            <if test="selectOrdersRequest.status == 4">
+                and o.status = 2
+            </if>
+            order by o.create_time desc
+        </where></select>
+
+<!--    IPage<SelectOrdersResponse> selectAllOrders(IPage<SelectOrdersResponse> queryPageRequest,-->
+<!--    @Param("selectOrdersRequest") SelectOrdersRequest selectOrdersRequest);-->
+    <select id="selectAllOrders"
+            resultMap="SelectOrdersResponse">
+        select o.order_id, o.good_id, g.name gName, g.type_id, t.name Tname, o.customer_id, c.name Cname,
+        g.start, g.destination, g.weight, o.status, o.driver_id, d.name dName,o.fees,
+        g.remark cRemark, o.create_time,d.car_id,ct.name carName,d.car_number,
+        d.telephone, d.gender, i.create_time dCreate_time,i.remark dRemark
+        from orders o, goods g, customer c, goods_type t, driver d, car_type ct,driver_intention i
+        <where>
+            o.good_id = g.good_id
+            and o.intention_id = i.intention_id
+            and g.type_id = t.type_id
+            and o.customer_id = c.customer_id
+            and o.driver_id = d.driver_id
+            and d.car_id = ct.car_id
+            <if test="selectOrdersRequest.status == 1">
+
+            </if>
+            <if test="selectOrdersRequest.status == 2">
+                and o.status = 0
+            </if>
+            <if test="selectOrdersRequest.status == 3">
+                and o.status = 1
+            </if>
+            <if test="selectOrdersRequest.status == 4">
+                and o.status = 2
+            </if>
+        </where></select>
+</mapper>

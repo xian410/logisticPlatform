@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.management.mapper.TradingRecordMapper">
+
+    <resultMap id="SelectTradingRecordResponse" type="com.example.demo.management.entity.response.SelectTradingRecordResponse">
+        <result column="order_id" property="orderId"/>
+        <result column="login_id" property="loginId"/>
+        <result column="trade_id" property="tradeId"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectTradingRecord" resultMap="SelectTradingRecordResponse">
+        select trade_id,order_id,login_id,status,sources,fees,create_time
+        from trading_record
+        where login_id = #{loginId}
+        order by create_time desc
+    </select>
+
+<!--    IPage<SelectTradingRecordResponse> selectAllTradingRecord(IPage<SelectTradingRecordResponse> queryPageRequest);-->
+    <select id="selectAllTradingRecord" resultMap="SelectTradingRecordResponse">
+        select trade_id,order_id,login_id,status,sources,fees,create_time
+        from trading_record
+        order by create_time desc
+    </select>
+
+</mapper>

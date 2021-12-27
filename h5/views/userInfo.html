@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>个人主页</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="../css/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div id="app">
+    <div class="container">
+        <el-row>
+            <el-col :span="6" class="userInfo">
+                <ul style="padding-top: 60px">
+                    <li class="active">
+                        <a href="userInfo.html">
+                            <div class="userInfo-content">
+                                <i class=" glyphicon glyphicon-copy"></i>
+                            </div>
+                            <span>基础设置</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="updatePassword.html">
+                            <div class="userInfo-content">
+                                <i class="el-icon-edit"></i>
+                            </div>
+                            <span>修改密码</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="account.html">
+                            <div class="userInfo-content">
+                                <i class="el-icon-edit"></i>
+                            </div>
+                            <span>个人账户</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <div class="userInfo-content">
+                                <i class="el-icon-edit"></i>
+                            </div>
+                            <span>系统设置</span>
+                        </a>
+                    </li>
+                </ul>
+            </el-col>
+<!--            货主界面-->
+            <el-col :span="16" class="information" v-if="userType == 0">
+                <div class="header">
+                    <div class="inf-avatar">
+                        <img class="img" src="../img/customer.png" :size="80">
+                    </div>
+                    <div class="head_btn">
+                        <el-button type="small" >更改头像</el-button>
+                    </div>
+                </div>
+                <el-form :model="form" label-width="80px">
+                    <el-form-item label="账号:">
+                        <el-input v-model="form.loginId" :disabled="true"> </el-input>
+                    </el-form-item>
+                    <el-form-item label="姓名:">
+                        <el-input v-model="form.name" :disabled="true"> </el-input>
+                    </el-form-item>
+                    <el-form-item label="性别:">
+                        <el-select v-model="form.gender"  placeholder="请选择">
+                            <el-option lable="男" value="男"></el-option>
+                            <el-option lable="女" value="女"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label= "电话:">
+                        <el-input v-model="form.telephone" :disabled="true"> </el-input>
+                    </el-form-item>
+                    <el-form-item label= "家庭住址:">
+                        <el-input v-model="form.address"> </el-input>
+                    </el-form-item>
+                    <el-form-item label= "常运货物类型:">
+                        <el-select
+                                v-model="form.userGoods"
+                                multiple
+                                placeholder="请选择"
+                        >
+                            <el-option
+                                    v-for="item in userGoodsType"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label= "个性签名:">
+                        <el-input type="textarea" v-model="form.note"> </el-input>
+                    </el-form-item>
+                    <el-button @click="modCustomerInfo" type="primary" size="large">保存</el-button>
+                </el-form>
+            </el-col>
+
+<!--            司机界面-->
+            <el-col :span="16" class="information" v-else>
+                <div class="header">
+                    <div class="inf-avatar">
+                        <img class="img" src="../img/driver.png" :size="80">
+                    </div>
+                    <div class="head_btn">
+                        <el-button type="small" >更改头像</el-button>
+                    </div>
+                </div>
+                <el-form :model="form" label-width="80px">
+                    <el-form-item label="账号:">
+                        <el-input v-model="driver.form.driverId" :disabled="true"> </el-input>
+                    </el-form-item>
+                    <el-form-item label="姓名:">
+                        <el-input v-model="driver.form.name" :disabled="true"> </el-input>
+                    </el-form-item>
+                    <el-form-item label= "电话:">
+                        <el-input v-model="driver.form.telephone" :disabled="true"> </el-input>
+                    </el-form-item>
+                    <el-form-item label= "车型:">
+                        <el-select v-model="driver.form.carId"  placeholder="请选择">
+                            <el-option
+                                    v-for="item in driver.carOptions"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label= "车牌号:">
+                        <el-input v-model="driver.form.carNumber"> </el-input>
+                    </el-form-item>
+                    <el-form-item label= "可运输类型:">
+                        <el-select v-model="driver.form.transType" multiple placeholder="请选择">
+                            <el-option
+                                    v-for="item in driver.transOptions"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-button type="primary" size="large" @click="modDriverInfo()">保存</el-button>
+                </el-form>
+            </el-col>
+        </el-row>
+    </div>
+
+</div>
+<script src="../js/jquery-3.5.1.min.js"></script>
+<script src="../js/vue-v2.6.11.js"></script>
+<script src="//unpkg.com/element-ui@2.15.7/lib/index.js"></script>
+<script src="../js/common.js"></script>
+<script src="../js/apiurls.js"></script>
+<script>
+    let vm = new Vue({
+        el: '#app',
+        data: {
+            userType: '',
+            form: {
+                loginId:'',
+                address: '',
+                gender: '',
+                name: '',
+                telephone: '',
+                userGoods: [],
+            },
+            userGoodsType: [],
+            driver: {
+                form: {
+                    driverId:'',
+                    carNumber: '',
+                    carId: '',
+                    gender: '',
+                    name: '',
+                    telephone: '',
+                    transType:[],
+                },
+                carOptions:[],
+                transOptions:[]
+            },
+            rules:{
+                address: [
+                    {required: true, message: "请输入家庭住址", trigger: 'blur'}
+                ],
+                name: [
+                    {required: true, message: "请输入姓名", trigger: 'blur'}
+                ],
+                telephone: [
+                    {required: true, message: "请输入联系方式", trigger: 'blur'}
+                ]
+            }
+        },
+        methods: {
+            modCustomerInfo() {
+                let that = this
+                let data = {
+                    "address": that.form.address,
+                    "gender": that.form.gender,
+                    "name": that.form.name,
+                    "telephone": that.form.telephone,
+                    "userGoods": that.form.userGoods.toString()
+                }
+                if (that.form.gender === "男") {
+                    data.gender = 1
+                }else {
+                    data.gender = 0
+                }
+                console.log(data)
+                getPostData(apiUrls.customer.modCustomerInfo, data, 'post', function (data){
+                    if (data.msg === 'success') {
+                        that.$message({
+                            message: "保存成功",
+                            type: 'success'
+                        });
+                    } else {
+                        that.$message({
+                            message: data.msg,
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            modDriverInfo() {
+                let that = this
+                let data = {
+                    "gender": that.driver.form.gender,
+                    "name": that.driver.form.name,
+                    "telephone": that.driver.form.telephone,
+                    "transType": that.driver.form.transType.toString(),
+                    carId: that.driver.form.carId,
+                    carNumber: that.driver.form.carNumber
+
+                }
+                if (that.form.gender === "男") {
+                    data.gender = 1
+                }else {
+                    data.gender = 0
+                }
+                getPostData(apiUrls.driver.modDriverInfo, data, 'post', function (data){
+                    if (data.msg === 'success') {
+                        that.$message({
+                            message: "保存成功",
+                            type: 'success'
+                        });
+                    } else {
+                        that.$message({
+                            message: data.msg,
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            getGoodTypes() {
+                let that = this
+                let data = ''
+                getPostData(apiUrls.goodType.getGoodTypes,data,'post',function (data) {
+                    if (data.msg === 'success') {
+                        let t = data.data
+                        let type = new Array()
+                        for (let i = 0; i < t.length; i++) {
+                            type.push({
+                                value: t[i].typeId,
+                                name: t[i].name
+                            })
+                        }
+                        that.userGoodsType = type
+                        that.driver.transOptions = type
+                    } else {
+                        that.$message({
+                            message: "获取货物类型列表失败",
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            getInformation() {
+                let that = this
+                let data = ''
+                if (that.userType === 0) {
+                    getPostData(apiUrls.customer.getCustomerInfo,data,'post',function (data) {
+                        if (data.msg === 'success') {
+                            that.form = data.data
+                            //截取字符串
+                            let s = data.data.userGoods
+                            let userGoods = s.split(',')
+                            that.form.userGoods = userGoods
+
+                        } else {
+                            this.$message({
+                                message: data.msg(),
+                                type: 'error'
+                            });
+                        }
+                    })
+                } else {
+                    getPostData(apiUrls.driver.getDriverInfo,data,'post',function (data) {
+                        if (data.msg === 'success') {
+                            that.driver.form = data.data
+                            let s = data.data.transType
+                            let transType = s.split(',')
+                            that.driver.form.transType = transType
+
+                        } else {
+                            that.$message({
+                                message: data.msg,
+                                type: 'error'
+                            });
+                        }
+                    })
+                }
+            },
+            getCarTypes() {
+                let that = this
+                let data = ''
+                getPostData(apiUrls.carType.getCarTypes,data,'post',function (data) {
+                    if (data.msg === 'success') {
+                        let t = data.data
+                        let type = new Array()
+                        for (let i = 0; i < t.length; i++) {
+                            type.push({
+                                value: t[i].carId,
+                                name: t[i].name
+                            })
+                        }
+                        that.driver.carOptions = type
+                    } else {
+                        that.$message({
+                            message: "获取货物类型列表失败",
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            getUserType() {
+                let that = this
+                let data = ''
+                getPostData(apiUrls.login_user.getUserType,data,'post',function (data) {
+                    if (data.msg === 'success') {
+                        that.userType = data.data
+                        that.getInformation()
+                    } else {
+                        this.$message({
+                            message: data.msg(),
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+        },
+        created() {
+            this.getUserType()
+            this.getGoodTypes()
+            this.getCarTypes()
+        },
+    })
+</script>
+</body>
+</html>

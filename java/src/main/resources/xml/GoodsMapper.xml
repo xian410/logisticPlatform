@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.management.mapper.GoodsMapper">
+    <resultMap id="SelectGoodListResponse" type="com.example.demo.management.entity.response.SelectGoodListResponse">
+        <result column="good_id" property="goodId"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="Cname" property="customerName"/>
+        <result column="type_id" property="typeId"/>
+        <result column="Tname" property="typeName"/>
+        <result column="fees_max" property="feesMax"/>
+        <result column="fees_min" property="feesMin"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    <select id="selectAllGoods" resultMap="SelectGoodListResponse">
+        select g.good_id, g.name, g.customer_id, c.name Cname,c.telephone, g.type_id, t.name Tname,
+               g.fees_max, g.fees_min, g.start, g.destination, g.weight,
+               g.remark, g.create_time
+        from   goods g, customer c, goods_type t
+        <where>
+            g.customer_id = c.customer_id
+            and g.good_id not in (
+            select good_id from orders
+            )
+            and g.type_id = t.type_id
+            <if test="selectGoodsRequest.start != null and selectGoodsRequest.start != ''">
+                and g.start like '%${selectGoodsRequest.start}%'
+            </if>
+            <if test="selectGoodsRequest.name != null and selectGoodsRequest.name != ''">
+                and g.name like '%${selectGoodsRequest.name}%'
+            </if>
+            <if test="selectGoodsRequest.destination != null and selectGoodsRequest.destination != ''">
+                and g.destination like '%${selectGoodsRequest.destination}%'
+            </if>
+            <if test="selectGoodsRequest.typeId != null and selectGoodsRequest.typeId != ''">
+                and g.type_id = #{selectGoodsRequest.typeId}
+            </if>
+        </where>
+            order by g.create_time desc
+    </select>
+
+    <select id="selectCustomerGoods"
+            resultMap="SelectGoodListResponse">
+        select g.good_id, g.name, g.customer_id, c.name Cname,c.telephone, g.type_id, t.name Tname,
+        g.fees_max, g.fees_min, g.start, g.destination, g.weight,
+        g.remark, g.create_time
+        from   goods g, customer c, goods_type t
+        <where>
+            g.customer_id = c.customer_id
+            and g.type_id = t.type_id
+            <if test="customerId != null and customerId != ''">
+                and g.customer_id = #{customerId}
+            </if>
+            <if test="selectGoodsRequest.start != null and selectGoodsRequest.start != ''">
+                and g.start like '%${selectGoodsRequest.start}%'
+            </if>
+            <if test="selectGoodsRequest.destination != null and selectGoodsRequest.destination != ''">
+                and g.destination like '%${selectGoodsRequest.destination}%'
+            </if>
+            <if test="selectGoodsRequest.typeId != null and selectGoodsRequest.typeId != ''">
+                and g.type_id = #{selectGoodsRequest.typeId}
+            </if>
+        </where>
+        order by g.create_time desc
+    </select>
+
+
+    <select id="getGoodName" resultType="java.lang.String">
+        select name from goods where good_id = #{goodId}
+    </select>
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.management.mapper.DriverIntentionMapper">
+
+    <resultMap id="SelectIntentionRequest" type="com.example.demo.management.entity.response.SelectIttentionListResponse">
+        <result column="intention_id" property="intentionId"/>
+        <result column="good_id" property="goodId"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="Cname" property="customerName"/>
+        <result column="type_id" property="typeId"/>
+        <result column="Tname" property="typeName"/>
+        <result column="fees_max" property="feesMax"/>
+        <result column="fees_min" property="feesMin"/>
+        <result column="create_time" property="createTime"/>
+        <result column="driver_id" property="driverId"/>
+        <result column="dName" property="driverName"/>
+        <result column="car_id" property="carId"/>
+        <result column="carName" property="carName"/>
+        <result column="status" property="status"/>
+        <result column="car_number" property="carNumber"/>
+        <result column="dRemark" property="driverRemark"/>
+        <result column="dCreate_time" property="driverCreateTime"/>
+    </resultMap>
+
+    <select id="selectCustomerIntention"
+            resultMap="SelectIntentionRequest" >
+        select i.intention_id, i.good_id, g.name, i.customer_id, c.name Cname, g.type_id, t.name Tname,
+        g.fees_max, g.fees_min, g.start, g.destination, g.weight,i.fees,d.car_id,ct.name carName,d.car_number,
+        d.telephone, d.gender,
+        g.remark, g.create_time, i.driver_id, d.name dName, i.remark dRemark, i.create_time dCreate_time
+        from driver_intention i, goods g, customer c, goods_type t, driver d, car_type ct
+        <where>
+            i.good_id = g.good_id
+            and g.type_id = t.type_id
+            and i.driver_id = d.driver_id
+            and d.car_id = ct.car_id
+            and i.customer_id = c.customer_id
+            and i.customer_id = #{customerId}
+            and i.status = 0
+            <if test="selectIntentionRequest.name != null and selectIntentionRequest.name != ''">
+                and g.name like '%${selectIntentionRequest.name}%'
+            </if>
+            <if test="selectIntentionRequest.typeId != null and selectIntentionRequest.typeId != ''">
+                and g.type_id = '${selectIntentionRequest.typeId}'
+            </if>
+        </where>
+        order by i.create_time desc
+    </select>
+
+
+    <select id="selectDriverIntention"
+            resultMap="SelectIntentionRequest">
+        select i.intention_id, i.status, i.good_id, g.name, i.customer_id, c.name Cname, g.type_id, t.name Tname,
+        g.fees_max, g.fees_min, g.start, g.destination, g.weight,i.fees,d.car_id,ct.name carName,d.car_number,
+        d.telephone, d.gender,
+        g.remark, g.create_time, i.driver_id, d.name dName, i.remark dRemark, i.create_time dCreate_time
+        from driver_intention i, goods g, customer c, goods_type t, driver d, car_type ct
+        <where>
+            i.good_id = g.good_id
+            <if test="selectIntentionRequest.status == 1">
+                and i.status = 1
+            </if>
+            <if test="selectIntentionRequest.status == 2">
+                and i.status = 2
+            </if>
+            and g.type_id = t.type_id
+            and i.driver_id  =d.driver_id
+            and d.car_id = ct.car_id
+            and i.customer_id = c.customer_id
+            and i.driver_id = #{driverId}
+            <if test="selectIntentionRequest.name != null and selectIntentionRequest.name != ''">
+                and g.name like '%${selectIntentionRequest.name}%'
+            </if>
+            <if test="selectIntentionRequest.typeId != null and selectIntentionRequest.typeId != ''">
+                and g.type_id = '${selectIntentionRequest.typeId}'
+            </if>
+        </where>
+            order by i.create_time desc
+    </select>
+</mapper>

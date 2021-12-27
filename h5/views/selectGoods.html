@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>货单浏览</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/bootstrap/bootstrap.min.css">
+</head>
+<body>
+<div id="app">
+    <div class="container">
+        <el-form class="search-form">
+            <el-form-item>
+                <label>出发地：</label>
+                <el-input v-model="search.start" class="search-input"></el-input>
+                <label>目的地：</label>
+                <el-input v-model="search.destination" class="search-input"></el-input>
+                <label>货物类型：</label>
+                <el-select v-model="search.goodType" placeholder="请选择" style="margin-right: 30px" clearable>
+                    <el-option
+                            v-for="item in search.goodsOptions"
+                            :key="item.typeId"
+                            :label="item.name"
+                            :value="item.typeId">
+                    </el-option>
+                </el-select>
+                <el-button type="primary" @click="getGoods()">搜索</el-button>
+            </el-form-item>
+        </el-form>
+        <div class="list" v-for="item in goodsInf">
+            <el-card class="box-card">
+                <template >
+                    <el-descriptions class="margin-top" :column="3" border>
+                        <el-descriptions-item>
+                            <template slot="label">
+                                <i class="el-icon-user"></i>
+                                货主姓名
+                            </template>
+                            <a style="text-decoration:none" @click="getById(item.customerId)">{{item.customerName}}</a>
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                            <template slot="label">
+                                <i class="el-icon-mobile-phone"></i>
+                                手机号
+                            </template>
+                            {{item.telephone}}
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                            <template slot="label">
+                                <i class="el-icon-location-outline"></i>
+                                物品名称
+                            </template>
+                            {{item.name}}
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                            <template slot="label">
+                                <i class="el-icon-tickets"></i>
+                                货物类型
+                            </template>
+                            <el-tag size="small">{{item.typeName}}</el-tag>
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                            <template slot="label">
+                                <i class="el-icon-location-outline"></i>
+                                物品重量
+                            </template>
+                            {{item.weight}}kg
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                            <template slot="label">
+                                <i class="el-icon-office-building"></i>
+                                发货地址
+                            </template>
+                            {{item.start}}
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                            <template slot="label">
+                                <i class="el-icon-office-building"></i>
+                                运输目的地
+                            </template>
+                            {{item.destination}}
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                            <template slot="label">
+                                <i class="el-icon-office-building"></i>
+                                价格要求
+                            </template>
+                            <span style="color: #EAAE3E;font-size: 18px">{{item.feesMin}} - {{item.feesMax}}</span>
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                            <template slot="label">
+                                <i class="el-icon-office-building"></i>
+                                发布时间
+                            </template>
+                            {{item.createTime}}
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                            <template slot="label">
+                                <i class="el-icon-office-building"></i>
+                                订单状态
+                            </template>
+                            <div v-if="item.isIntention">
+                                <el-tag type="success">已报价</el-tag>
+                            </div>
+                            <div v-else>
+                                <el-tag type="warning">等待司机承运</el-tag>
+                            </div>
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                            <template slot="label">
+                                <i class="el-icon-office-building"></i>
+                                备注
+                            </template>
+                        </el-descriptions-item>
+                    </el-descriptions>
+                    <span style="display:inline-block;margin-top: 10px;font-size: 15px">已有{{item.count}}人接单</span>
+                    <el-button type="success" size="small" class="button_click pull-right"
+                               @click="receive(item.customerId, item.goodId)"
+                                :disabled="item.isIntention">接单承运
+                    </el-button>
+                </template>
+            </el-card>
+        </div>
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                background
+                :current-page= "page.current"
+                :page-sizes="[5, 10, 20, 40]"
+                :page-size="page.size"
+                layout = "total, sizes, prev, pager, next, jumper"
+                :total="page.total"
+                style="margin-bottom: 30px">
+        </el-pagination>
+    </div>
+    <!--接单承运弹出模态框/-->
+    <el-dialog
+            title="提示"
+            :visible.sync="receiveDialogVisible"
+            width="30%">
+        <el-form :model="form">
+            <el-form-item label="报价" :label-width="120">
+                <el-input v-model="form.fees" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="备注" :label-width="120">
+                <el-input type="textarea" v-model="form.comment" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="handleReceive()">确 定</el-button>
+  </span>
+    </el-dialog>
+    <el-dialog
+            title="货主个人信息"
+            :visible.sync="dialogVisible"
+            width="30%">
+        <el-form :model="customerForm" label-width="80px">
+            <el-form-item label="姓名:">
+                <lable>{{customerForm.name}}</lable>
+            </el-form-item>
+            <el-form-item label="性别:">
+                <el-select v-model="customerForm.gender"  placeholder="请选择" :disabled="true">
+                    <el-option lable="男" value="男"></el-option>
+                    <el-option lable="女" value="女"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label= "电话:">
+                <lable>{{customerForm.telephone}}</lable>
+            </el-form-item>
+            <el-form-item label= "家庭住址:">
+                <lable>{{customerForm.address}}</lable>
+            </el-form-item>
+            <el-form-item label= "常运货物类型:" >
+                <el-select
+                        v-model="customerForm.userGoods"
+                        multiple
+                        placeholder="请选择"
+                        :disabled="true"
+                >
+                    <el-option
+                            v-for="item in userGoodsType"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label= "个性签名:">
+                <lable>{{customerForm.note}}</lable>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">确定</el-button>
+  </span>
+    </el-dialog>
+</div>
+
+<script src="../js/jquery-3.5.1.min.js"></script>
+<script src="../js/vue-v2.6.11.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="../js/common.js"></script>
+<script src="../js/apiurls.js"></script>
+<script>
+    const vm = new Vue({
+        el: '#app',
+        customerId: '',
+        goodId: '',
+        data: {
+            dialogVisible: false,
+            receiveDialogVisible: false,
+            activeName: 'first',
+            goodsInf: [],
+            searchContent: '',
+            search: {
+                start: '',
+                destination: '',
+                goodType: '',
+                goodsOptions: []
+            },
+            customerForm: {
+                loginId:'',
+                address: '',
+                gender: '',
+                name: '',
+                telephone: '',
+                userGoods: [],
+            },
+            userGoodsType: [],
+            form: {
+                fees: '',
+                comment: ''
+            },
+            page: {
+                //当前页
+                current: 1,
+                //最大页数
+                total: '',
+                size:10
+            }
+        },
+        methods: {
+            handleClick(tab, event) {
+                console.log(tab, event);
+            },
+            getGoodTypes() {
+                let that = this
+                let data = ''
+                getPostData(apiUrls.goodType.getGoodTypes, data, 'post', function (data) {
+                    if (data.msg === 'success') {
+                        let t = data.data
+                        let type = new Array()
+                        for (let i = 0; i < t.length; i++) {
+                            type.push({
+                                value: t[i].typeId,
+                                name: t[i].name
+                            })
+                        }
+                        that.userGoodsType = type
+                        that.search.goodsOptions = data.data
+                    } else {
+                        that.$message({
+                            message: "获取货物类型列表失败",
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            getGoods() {
+                let that = this
+                let data = {
+                    "destination": that.search.destination,
+                    "pageRequest": {
+                        "current": that.page.current,
+                        "size": that.page.size
+                    },
+                    "start": that.search.start,
+                    "typeId": that.search.goodType
+                }
+                getPostData(apiUrls.goods.selectAllGoods, data, 'post', function (data) {
+                    if (data.msg === 'success') {
+                        console.log(data.data)
+                        that.goodsInf = data.data.records
+                        that.page.total = data.data.total
+                    } else {
+                        that.$message({
+                            message: data.msg(),
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            handleReceive() {
+                let that = this
+                if (!that.form.fees) {
+                    that.$message({
+                        message: "报价不能为空",
+                        type: 'error'
+                    });
+                }
+                if (that.form.fees <= 0) {
+                    that.$message({
+                        message: "报价不能低于0元",
+                        type: 'error'
+                    });
+                }
+                else {
+                    let data = {
+                        "customerId": that.customerId,
+                        "fees": that.form.fees,
+                        "goodId": that.goodId,
+                        "remark": that.form.comment
+                    }
+                    getPostData(apiUrls.driverIntention.addIntention, data, 'post', function (result) {
+                        if (result.msg === 'success') {
+                            that.$message({
+                                message: "接单成功",
+                                type: 'success'
+                            });
+                            that.receiveDialogVisible = false
+                            that.getGoods()
+                        } else {
+                            that.$message({
+                                message: result.msg,
+                                type: 'error'
+                            });
+                        }
+                    })
+                }
+            },
+            receive(CId, GId) {
+                let that = this
+                that.receiveDialogVisible = true
+                that.customerId = CId
+                that.goodId = GId
+            },
+            getById(id) {
+                let that = this
+                let data = {
+                    "customerId": id
+                }
+                this.dialogVisible = true
+                getPostData(apiUrls.customer.getCustomerInfoById, data, 'post', function (result) {
+                    if (result.code === 0) {
+                        that.customerForm = result.data
+                        let s = that.customerForm.userGoods
+                        let s1 = s.split(',')
+                        that.customerForm.userGoods = s1
+                    } else {
+                        that.$message({
+                            message: result.msg,
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            // 初始页currentPage、初始每页数据数pagesize和数据data
+            handleSizeChange: function (size) {
+                this.page.size = size;
+                console.log(this.page.size)  //每页下拉显示数据
+                this.getGoods()
+            },
+            handleCurrentChange: function(currentPage){
+                this.page.current = currentPage;
+                console.log(this.page.current)  //点击第几页
+                this.getGoods()
+            },
+        },
+        mounted() {
+            this.getGoodTypes()
+            this.getGoods()
+        }
+    })
+</script>
+</body>
+</html>

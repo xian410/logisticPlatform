@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/bootstrap/bootstrap.min.css">
+</head>
+<body>
+<div id="app">
+    <el-menu
+            :default-active="activeIndex"
+            class="el-menu-demo"
+            mode="horizontal"
+            @select="handleSelect"
+            background-color="#545c64"
+            text-color="#fff"
+            active-text-color="#ffd04b">
+        <el-menu-item index="1">我的订单</el-menu-item>
+        <el-menu-item index="2">运单浏览</el-menu-item>
+        <el-menu-item index="3">已申请运单</el-menu-item>
+        <el-menu-item index="7">
+            <el-badge :value="messageCount" :hidden="isHidden" class="item">
+                我的消息
+            </el-badge>
+        </el-menu-item>
+        <el-menu-item index="4">联系我们</el-menu-item>
+        <div class="inf">
+            <el-dropdown @command="handleCommand">
+                <div class="avatar-button" class="el-dropdown-link">
+                    <el-avatar src="../img/driver.png" class="avatar"></el-avatar>
+                    <div class="header-name">{{name}}</div>
+                </div>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="5">个人主页</el-dropdown-item>
+                    <el-dropdown-item command="6">退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
+        </div>
+
+    </el-menu>
+    <iframe :src="urlPath" width="100%" height="900px" style="border: 0;"></iframe>
+</div>
+<script src="../js/jquery-3.5.1.min.js"></script>
+<script src="../js/vue-v2.6.11.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="../js/common.js"></script>
+<script src="../js/apiurls.js"></script>
+<script>
+    let vm = new Vue({
+        el: '#app',
+        data: {
+            name:'',
+            activeIndex: '',
+            urlPath: 'transStatus.html',
+            messageCount: 0,
+            isHidden: true
+        },
+        methods: {
+            preSetActive() {
+                let url = window.location.href.toString();
+                let key = url.split('=')[1]
+                if (isNaN(key)) {
+                    key = 1
+                }
+                this.activeIndex = key.toString()
+                switch (key.toString()) {
+                    case '1': this.urlPath = 'driverOrders.html'; break;
+                    case '2': this.urlPath = 'selectGoods.html'; break;
+                    case '3': this.urlPath = 'applyIntention.html'; break;
+                    case '4': this.urlPath = '../404.html'; break;
+                    case '5': this.urlPath = 'userInfo.html'; break;
+                    case '7': this.urlPath = 'message.html'; break;
+                }
+                console.log(this.urlPath)
+            },
+            handleSelect(key) {
+                window.location.href = 'homePage.html?key='+key
+            },
+            handleCommand(command) {
+                switch (command) {
+                    case '5': window.location.href = 'homePage.html?key='+command;break;
+                    case '6': this.logout(); break;
+                }
+            },
+            getInformation() {
+                let that = this
+                let data = ''
+                getPostData(apiUrls.driver.getDriverInfo,data,'post',function (data) {
+                    if (data.msg === 'success') {
+                        that.name = data.data.name
+                    } else {
+                        that.$message({
+                            message: data.msg,
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            logout() {
+                let that = this
+                that.$confirm('您确定要退出吗?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    getPostData(apiUrls.login_user.logout,'','post',function (data) {
+                        if(data.code === 0) {
+                            window.location.href = '../index.html';
+                        }else {
+                            that.$message(data.msg);
+                        }
+                    })
+                });
+            },
+            countMessage() {
+                let that = this
+                let data = ''
+                getPostData(apiUrls.message.countUnreadMessage,data,'post', function (data) {
+                    if (data.msg === 'success') {
+                        that.messageCount = data.data
+                        if (that.messageCount > 0) {
+                            that.isHidden = false
+                        }
+                    } else {
+                        that.$message({
+                            message: data.msg,
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+        },
+        beforeMount() {
+            this.preSetActive()
+            this.getInformation()
+            this.countMessage()
+        }
+    })
+</script>
+</body>
+</html>

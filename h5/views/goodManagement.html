@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="">
+<head>
+    <meta charset="UTF-8">
+    <title>货物管理</title>
+    <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="../assets/nprogress/nprogress.css">
+    <link rel="stylesheet" href="../css/element-ui@2.13.0-theme-chalk-index.css">
+    <link rel="stylesheet" href="../css/index.css">
+    <style>
+        .el-table thead, .el-table {
+            color: black;
+            border: 1px solid #A0A0A0
+        }
+
+        .spanStyle {
+            white-space: nowrap; /*强制span不换行*/
+            display: inline-block; /*将span当做块级元素对待*/
+            width: 180px; /*限制宽度*/
+            overflow: hidden; /*超出宽度部分隐藏*/
+            text-overflow: ellipsis; /*超出部分以点号代替*/
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!-- 客户列表 -->
+    <div class="body">
+        <!-- 面包屑 -->
+        <ol class="breadcrumb">
+            <li><a href="javascript:;">货物管理</a></li>
+            <li class="active">货物列表</li>
+        </ol>
+        <div class="panel panel-default user-list">
+            <div class="panel-body">
+                <form action="" class="form-inline">
+                    <div class="input-group pull-right" style="margin-right: 50px">
+                        <label>货物名：</label>
+                        <el-input style="width: 100px" v-model="search.name"></el-input>
+                        <span class="input-group-btn">
+                            <el-button  @click="getList()" value="搜索"  style="margin-left: 10px">查询</el-button>
+                        </span>
+                    </div>
+               </form>
+            </div>
+            <template>
+                <el-table
+                        :data="goods"
+                        style="width: 100%"
+                        border
+                        :default-sort = "{prop: 'date', order: 'descending'}"
+                >
+                    <el-table-column
+                            prop="goodId"
+                            label="货物编号"
+                            sortable
+                            width="150">
+                        <template scope="scope">
+                            <el-tooltip class="item" effect="dark" :content="scope.row.goodId" placement="top">
+                                <span class="spanStyle">{{scope.row.goodId}}</span>
+                            </el-tooltip>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            prop="name"
+                            label="名称"
+                            sortable
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="typeName"
+                            label="货物类型"
+                            sortable
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="start"
+                            label="起始地"
+                            sortable
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="destination"
+                            label="目的地"
+                            sortable
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="customerName"
+                            label="货主姓名"
+                            sortable
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="createTime"
+                            label="发布时间"
+                            sortable
+                            width="200">
+                    </el-table-column>
+                    <el-table-column
+                            prop="operate"
+                            label="操作">
+                        <template slot-scope="scope">
+                            <el-button
+                                    size="mini"
+                                    type="danger"
+                                    @click="delGood(scope.$index, scope.row)">删除货物</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </template>
+        </div>
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                background
+                :current-page="page.current"
+                :page-sizes="[5, 10, 20, 40]"
+                :page-size="page.size"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="page.total"
+                style="margin-bottom: 30px">
+        </el-pagination>
+    </div>
+</div>
+<script src="../assets/jquery/jquery.min.js"></script>
+<script src="../js/vue-v2.6.11.js"></script>
+<script src="../js/element-ui@2.13.0-index.js"></script>
+<script src="../assets/bootstrap/js/bootstrap.min.js"></script>
+<script src="../assets/nprogress/nprogress.js"></script>
+<script src="../js/common.js"></script>
+<script src="../js/apiurls.js"></script>
+<script>
+    let vm = new Vue({
+        el: '#app',
+        data() {
+            return {
+                search: {
+                    name:'',
+                    loginId: ''
+                },
+                goods:[],
+                page: {
+                    //当前页
+                    current: 1,
+                    //最大页数
+                    total: '',
+                    size: 10
+                },
+            }
+        },
+        methods:{
+            getList() {
+                let that = this
+                let data = {
+                    name: that.search.name,
+                    pageRequest: {
+                        "current": that.page.current,
+                        "size": that.page.size
+                    }
+                }
+
+                getPostData(apiUrls.goods.selectAllGoods,data,'post',function (data) {
+                    if (data.msg === 'success') {
+                        that.goods = data.data.records
+                        that.page.total = data.data.total
+                    } else {
+                        that.$message({
+                            message: data.msg,
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            delGood(index,row) {
+                let that = this
+                that.$confirm('您确定要删除此货物吗?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let data = {
+                        goodId: row.goodId
+                    }
+                    getPostData(apiUrls.goods.delGoodById,data,'post',function (data) {
+                        if (data.msg === 'success') {
+                            that.$message({
+                                message: '删除成功',
+                                type: 'success'
+                            });
+                            that.getList()
+                        } else {
+                            that.$message({
+                                message: data.msg,
+                                type: 'error'
+                            });
+                        }
+                    })
+                })
+            },
+            handleSizeChange: function (size) {
+                this.page.size = size;
+                console.log(this.page.size)  //每页下拉显示数据
+                this.getList()
+            },
+            handleCurrentChange: function (currentPage) {
+                this.page.current = currentPage;
+                console.log(this.page.current)  //点击第几页
+                this.getList()
+            },
+
+
+        },
+        mounted(){
+            this.getList(1)
+        }
+    })
+</script>
+</body>
+</html>

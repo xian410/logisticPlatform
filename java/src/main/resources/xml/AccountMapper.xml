@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.management.mapper.AccountMapper">
+
+<!--    void queryAll();-->
+
+    <resultMap id="all" type="com.example.demo.management.entity.response.AllAccountResponse">
+        <id column="login_id" property="loginId"/>
+        <result column="user_type" property="type"/>
+        <result column="update_time" property="time"/>
+        <result column="name" property="name"/>
+        <result column="money" property="money"/>
+    </resultMap>
+<!--    IPage<AllAccountResponse> queryAll(IPage<AllAccountResponse> queryPageRequest, GetAccountRequest getAccountRequest);-->
+    <select id="queryAll" resultMap="all">
+        select l.login_id, l.user_type, l.update_time, d.name, a.money
+        from login_user l, driver d, account a
+        where l.login_id = d.login_id
+        and l.login_id = a.login_id
+        and l.user_type != 3
+        <if test="#{getAccountRequest.name != null || getAccountRequest.name != ''}">
+            and d.name like '%${getAccountRequest.name}%'
+        </if>
+    </select>
+
+<!--    IPage<AllAccountResponse> queryAllCustomer(IPage<AllAccountResponse> queryPageRequest,-->
+<!--    @Param("getAccountRequest") GetAccountRequest getAccountRequest);-->
+    <select id="queryAllCustomer" resultMap="all">
+        select l.login_id, l.user_type, l.update_time, c.name, a.money
+        from login_user l, customer c, account a
+        where l.login_id = c.login_id
+        and l.login_id = a.login_id
+        <if test="#{getAccountRequest.name != null || getAccountRequest.name != ''}">
+            and c.name like '%${getAccountRequest.name}%'
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,137 @@
+body {
+    padding: 0;
+    margin: 0;
+    font-family: "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", tahoma, arial, simsun, "宋体";
+    background-color: #FFFFFF;
+}
+img {
+    display: block;
+    width: 100%;
+}
+a:hover,a:link,a:visited,a:active,a:focus{
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+a {
+    cursor: pointer;
+}
+.inf {
+    color: whitesmoke;
+    float: right;
+    font-size: 16px;
+    padding-right: 40px;
+}
+.inf i {
+    display: none;
+}
+.list {
+    margin-bottom: 20px;!important;
+}
+.button_click {
+    margin: 15px;
+}
+.tabs {
+    font-size: 18px;
+    margin-top: 30px;
+}
+.avatar {
+    background-color: white;
+}
+.avatar-button {
+    padding-top: 15px;
+    background-color: transparent;
+    border: none;
+
+}
+.userInfo ul {
+    list-style: none;
+}
+.userInfo li {
+    line-height: 20px;
+}
+.userInfo li a:hover{
+    background-color: #F0F0F0;
+}
+.userInfo a {
+    padding: 15px 15px;
+    margin-bottom: 5px;
+    font-size: 18px;
+    display: block;
+    border-radius: 6px;
+    width: 250px;
+}
+.userInfo .userInfo-content{
+    margin-right: 30px;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    color: #fff;
+    background-color: #a0a0a0;
+    border-radius: 4px;
+    display: inline-block;
+    vertical-align: middle;
+}
+.userInfo .userInfo-content i {
+    margin: 6px 0 0 1px;
+    font-size: 18px;
+    display: block;
+}
+.information {
+    margin-top: 70px;
+}
+.header {
+    margin-left: 50px;
+    margin-bottom: 30px;
+}
+.inf-avatar {
+    width: 100px;
+    height: 100px;
+}
+.img {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+}
+.head_btn {
+    padding: 10px;
+}
+.search-form {
+    margin-top: 20px;
+}
+.search-input {
+    width: 150px;
+    margin-right: 20px;
+}
+.header-name {
+    color: white;
+    font-size: 20px;
+    display: inline-block;
+    vertical-align: top;
+    padding-top: 6px;
+    padding-left: 10px;
+}
+.active {
+    background-color: #F0F0F0;
+}
+.message-item {
+    margin-top: 10px;
+}
+.message-div {
+    font-size: 16px;
+}
+.message-isDelete {
+    color: #9d9d9d;
+}
+.message-bolder {
+    font-weight: bolder;
+}
+.message-time {
+    font-size: 10px;
+    display: inline-block;
+    margin-top: 10px;
+}
+.el-badge__content.is-fixed {
+    top: 10px;
+}
