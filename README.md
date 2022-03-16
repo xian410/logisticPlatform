@@ -7,3 +7,5 @@ vue+springboot-物流运输平台设计与开发-河工大
 ![image](https://github.com/miskamuska/logisticPlatform/blob/main/img/%E5%9B%BE%E7%89%87%2064.png?raw=true)
 ![image](https://github.com/miskamuska/logisticPlatform/blob/main/img/%E5%9B%BE%E7%89%87%2066.png?raw=true)
 ![image](https://github.com/miskamuska/logisticPlatform/blob/main/img/%E5%9B%BE%E7%89%87%2067.png?raw=true)
+![image](https://github.com/miskamuska/logisticPlatform/blob/main/img/%E5%9B%BE%E7%89%87%2068.png?raw=true)
+![image](https://github.com/miskamuska/logisticPlatform/blob/main/img/%E5%9B%BE%E7%89%87%2069.png?raw=true)
